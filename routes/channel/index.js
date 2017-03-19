@@ -11,9 +11,20 @@ const globals = require('../../globals/index');
     Index
     state: undefined
  */
-router.get('/', function(req, res){
+router.get('/', function(req, res, next){
     //Send undefined
-    res.render('channel'); //Should ask user to request with a channel id
+    //And list of channels
+    Channel.find({}, function(err, channels){
+        if(globals.isError(err, res)) next();
+        res.render('channel', {channel : undefined, list : channels}); //Should ask user to request with a channel id
+    });
+});
+
+/*
+    New
+ */
+router.get('/new', function(req, res){
+    res.render('channel/new');
 });
 
 /*
@@ -25,9 +36,19 @@ router.get('/:id', function(req, res, next){
         if(globals.isError(err, res)) next();
         //Will return null or the object depending on if channel is found or not
         //If null, should ask user to try again with a different id
-        res.render('channel', {channel : channel});
+        if(channel === null) {
+            Channel.find({}, function(err, channels) {
+                if(globals.isError(err, res)) next();
+                res.render('channel', {channel : null, list : channels}); //Also list available channels
+            });
+        } else {
+            res.render('channel/show', {channel : channel});
+
+        }
     });
 });
+
+
 
 /*
     Create
@@ -39,7 +60,7 @@ router.post('/', function(req, res){
         members : [req.body.user]
     }, function(err, channel){
         if(globals.isError(err, res)) next();
-        res.render('channel', {channel : channel});
+        res.redirect('/channel/'+channel._id);
     });
 });
 
