@@ -9,8 +9,6 @@ const http = require('http');
 
 
 
-
-
 /**
  * Get port from environment and store in Express.
  */
@@ -23,54 +21,8 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
-
-let Server = require('socket.io');
-let io = new Server(server);
-let channelNSP = io.of('/channel');
-let friendNSP = io.of('/friend');
-
-channelNSP.on('connection', function(socket){
-    /*
-        Connection
-     */
-    console.log('User ' + socket.id + ' has connected!');
-    socket.emit('message', "Global: Somebody has connected to a socket");
-
-    /*
-        Disconnection
-     */
-    socket.on('disconnect', function(){
-        console.log('A user has disconnected.');
-        io.emit('message', "Global: Somebody has disconnected from a socket.");
-    });
-
-    /*
-        Room Join
-     */
-    socket.on('room', function(room){
-        console.log("Joining room " + room);
-        socket.join(room);
-        console.log('ROOMS '+JSON.stringify(socket.rooms));
-        socket.to(room).emit('message', 'Somebody has joined the channel!');
-    });
-
-    /*
-        Messaging
-     */
-    //Room Messaging
-    socket.on('message', function(msg, room){
-        console.log('message', msg);
-        console.log('room', room);
-        socket.to(room).emit('message', msg);
-        socket.emit('message', msg);
-    });
-    //Broadcast Messaging (into channels)
-    socket.on('broadcast message', function(msg){
-        console.log('BROADCASTING message', msg);
-        socket.broadcast.emit('message', msg);
-        socket.emit('message', msg);
-    });
-});
+const chat = require('./chat');
+chat.initialize(server);
 
 /**
  * Listen on provided port, on all network interfaces.

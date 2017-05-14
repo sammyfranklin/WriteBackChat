@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Channel = require('../../models/channel');
 const globals = require('../../globals/index');
+const MessagePage = require('../../models/messagePage');
 /*
     3 States: undefined, null, object
     (Let EJS change depending on channel name is received)
@@ -53,14 +54,20 @@ router.get('/:id', function(req, res, next){
 /*
     Create
  */
-router.post('/', function(req, res){
-    Channel.create({
-        name : req.body.name,
-        description : req.body.description,
-        members : [req.body.user]
-    }, function(err, channel){
-        if(globals.isError(err, res)) next();
-        res.redirect('/channel/'+channel._id);
+router.post('/', function(req, res, next){
+    MessagePage.create({
+        messages: []
+    }, function(err, page){
+        Channel.create({
+            name : req.body.name,
+            description : req.body.description,
+            members : ["Anonymous"],
+            pageHead : page,
+            pageTail : page
+        }, function(err, channel){
+            if(globals.isError(err, res)) next();
+            res.redirect('/channel/'+channel._id);
+        });
     });
 });
 

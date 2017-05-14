@@ -1,5 +1,3 @@
-
-
 module.exports = {
     isError : function(err, res, customMessage){
         if(err){

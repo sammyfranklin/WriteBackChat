@@ -12,9 +12,13 @@ const ChannelSchema = new mongoose.Schema({
         user : String,
         content : String
     }],
-    messages : {
+    pageHead : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : 'page'
+        ref : 'messagePage'
+    },
+    pageTail : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'messagePage'
     },
     members : [String]
 },
