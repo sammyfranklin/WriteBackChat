@@ -1,9 +1,20 @@
-<%- include('partials/header') %>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.11/semantic.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <title>chat</title>
+</head>
+<body>
 
-<h1><%= title %></h1>
-<p>Welcome to <%= title %></p>
-<a href="/channel"><button>Go to a Channel</button></a>
-<a href="/channel/new"><button>Create a new Channel</button></a>
-
-<%- include('partials/dependencies') %>
-<%- include('partials/footer') %>
+    <div id="app"/>
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+    <scrip src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.11/semantic.min.js"></scrip>
+    <script src="/javascripts/bundle.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Channel = require('../../models/channel');
-const globals = require('../../globals/index');
+const globals = require('../../globals');
 const MessagePage = require('../../models/messagePage');
 /*
     3 States: undefined, null, object
