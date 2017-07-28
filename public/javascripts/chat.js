@@ -1,7 +1,6 @@
 (function(){
     console.log("Chatting");
     let channelSocket = io('http://localhost:8000/channel');
-    let friendSocket = io('http://localhost:8000/friend');
 
     let room = id;
 
@@ -21,7 +20,7 @@
         if(value.charAt(0) === '/') {
             channelSocket.emit('broadcast message', value.substring(1));
         } else {
-            channelSocket.emit('message', value, room);
+            channelSocket.emit('message', room, value);
         }
         input.value = '';
     });
