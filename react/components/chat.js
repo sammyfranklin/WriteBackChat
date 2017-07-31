@@ -23,7 +23,7 @@ class Chat extends React.Component {
     }
     setUpNetworking(){
         console.log("Joined channel Id", this.props.channelId);
-        networking.joinChannel(this.props.channelId);
+        networking.joinRoom(this.props.channelId);
         let self = this;
         networking.onMessage((message, user)=>{
             self.setState({

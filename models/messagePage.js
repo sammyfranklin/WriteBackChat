@@ -2,8 +2,14 @@ const mongoose = require('mongoose');
 
 const messagePageSchema = new mongoose.Schema({
     messages : [{
-        user : String,
-        content : String
+        author : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "user"
+        },
+        content : {
+            value : String,
+            date : Date
+        }
     }],
     next : {
         type: mongoose.Schema.Types.ObjectId,

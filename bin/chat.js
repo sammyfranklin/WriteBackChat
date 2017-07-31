@@ -3,6 +3,7 @@ const botty = {
     name : "Botty",
     age : Infinity
 };
+const MessageStore = require('./messageStore');
 
 
 module.exports = {
@@ -18,6 +19,7 @@ module.exports = {
 
             socket.on('set identity', (user={})=>{
                 currentUsers[socket.id] = {
+                	_id : user._id,
                 	name : user.name,
 					age : user.age,
 					email : user.email,
@@ -65,8 +67,11 @@ module.exports = {
                     value : msg,
                     date : new Date(Date.now())
                 };
-                io.to(toRoomId).emit('message', data, currentUsers[socket.id]);
-            });
+                let user = currentUsers[socket.id];
+                io.to(toRoomId).emit('message', data, user);
+				MessageStore.send(data, user, toRoomId);
+
+			});
 
 
         });

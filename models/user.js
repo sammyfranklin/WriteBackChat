@@ -3,8 +3,12 @@ const mongoose = require('mongoose');
 module.exports = mongoose.model("user", new mongoose.Schema({
     twitch : Object,
     online : Boolean,
+	createdRooms : [{
+    	type : String,
+		ref : "channel"
+	}],
     channels : [{
-        type : mongoose.Schema.Types.ObjectId,
+        type : String,
         ref : "channel"
     }],
     friends : [{

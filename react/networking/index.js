@@ -12,7 +12,8 @@ module.exports = {
 						name : user.twitch.displayName,
 						email : user.twitch.email,
 						provider : "twitch",
-						bio : user.twitch._json.bio
+						bio : user.twitch._json.bio,
+						_id : user._id
 					});
 				} else {
 					socket.emit('set identity', {
@@ -26,8 +27,46 @@ module.exports = {
 		}
     },
     room : {
-
-        joinChannel : function(roomId){
+    	post : function(room, callback){
+			$.ajax({
+				method : "POST",
+				url : "/channels",
+				dataType : "json",
+				data : room,
+				success : callback,
+				error : console.error
+			});
+		},
+		get : function(id=null, callback){
+    		let url = id ? '/channels/'+id : '/channels';
+			$.ajax({
+				method : "GET",
+				url : url,
+				dataType : "json",
+				success : callback,
+				error : console.error
+			});
+		},
+		getMine : function(callback){
+			$.ajax({
+				method : "GET",
+				url : '/users?fetch=rooms',
+				dataType : "json",
+				success : callback,
+				error : console.error
+			});
+		},
+		edit : function(id, room, callback){
+			$.ajax({
+				method : "PUT",
+				url : "/channels/"+id,
+				dataType : "json",
+				data : room,
+				success : callback,
+				error : console.error
+			});
+		},
+        joinRoom : function(roomId){
             socket.emit('room', roomId);
         },
         onMessage : function(callback){
@@ -36,7 +75,6 @@ module.exports = {
         sendMessage : function(toRoomId, message){
             socket.emit('message', toRoomId, message);
         }
-
     }
 
 };
