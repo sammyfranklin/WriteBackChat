@@ -1,10 +1,12 @@
 module.exports = {
-    isError : function(err, res, customMessage){
+    fault : function(err, next, customMessage){
         if(err){
-            res.send(err + '\n' + customMessage);
-            return true;
-        } else {
-            return false;
+            console.error({
+                error : err,
+                message : `ERROR(FAULT)! ${customMessage}`
+            });
+            return next() || true;
         }
+        return false;
     }
 };

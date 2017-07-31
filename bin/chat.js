@@ -1,51 +1,56 @@
+let currentUsers = {};
+const botty = {
+    name : "Botty",
+    age : Infinity
+};
+
+
 module.exports = {
     initialize : (server) => {
 
-        let Server = require('socket.io');
-        let io = new Server(server);
-        let channelNSP = io.of('/channel');
+        let io =  require('socket.io')(server);
 
-        let MessageStore = require('./messageStore');
-        let currentUsers = {};
-
+		/*
+		 Connection
+		 */
         io.on('connection', function(socket){
-            console.log('User ' + socket.id + ' has connected to the root NSP!');
+            console.log(socket.id, "connected!");
 
-            socket.on('set identity', (user)=>{
-                currentUsers[socket.id] = user;
+            socket.on('set identity', (user={})=>{
+                currentUsers[socket.id] = {
+                	name : user.name,
+					age : user.age,
+					email : user.email,
+					provider : user.provider,
+					bio : user.bio,
+					rooms : user.rooms || []
+				};
+                console.log("All users:", currentUsers);
             });
-
-            socket.on('message', (toId, msg)=>{
-                socket.to(toId).emit('message', {
-                    user : socket._user,
-                    message : msg
-                });
-            });
-
-            socket.on('disconnect', ()=>{
-                delete currentUsers[socket.id];
-            });
-        });
-
-        channelNSP.on('connection', function (socket) {
-            /*
-             Connection
-             */
-            console.log('User ' + socket.id + ' has connected to the channel NSP!');
 
             /*
              Disconnection
              */
-            socket.on('disconnect', function () {
-                io.emit('message', "Global: Somebody has disconnected from a socket.");
-            });
+			socket.on('disconnect', ()=>{
+				console.log(socket.id, "disconnected!");
+				delete currentUsers[socket.id];
+				console.log(currentUsers);
+			});
 
             /*
              Room Join
              */
             socket.on('room', function (room) {
+				let user = currentUsers[socket.id];
+				console.log(socket.id, ' has joined ', room);
                 socket.join(room);
-                channelNSP.to(room).emit('message', 'Somebody has joined the channel!');
+                user.rooms.push(room);
+                let data = {
+                    value : `${user.name} has joined the channel!`,
+                    date : new Date(Date.now())
+                };
+                io.to(room).emit('message', data, botty);
+                console.log(currentUsers);
             });
 
 
@@ -56,20 +61,14 @@ module.exports = {
             //Room Messaging
             socket.on('message', function (toRoomId, msg) {
                 //Send back to room and user
-                channelNSP.to(toRoomId).emit('message', msg);
-                /*
-                let messageStruct = {
-                    user: "Anonymous",
-                    content: msg
+                let data = {
+                    value : msg,
+                    date : new Date(Date.now())
                 };
-                MessageStore.send(messageStruct, room);
-                */
+                io.to(toRoomId).emit('message', data, currentUsers[socket.id]);
             });
 
-            //Broadcast Messaging (into channels)
-            socket.on('broadcast message', function (msg) {
-                channelNSP.emit('message', msg);
-            });
+
         });
     }
 };

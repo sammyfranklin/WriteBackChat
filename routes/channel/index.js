@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const Channel = require('../../models/channel');
-const globals = require('../../globals');
+const fault = require('../../globals').fault;
 const MessagePage = require('../../models/messagePage');
 /*
     3 States: undefined, null, object
@@ -16,7 +16,7 @@ router.get('/', function(req, res, next){
     //Send undefined
     //And list of channels
     Channel.find({}, function(err, channels){
-        if(globals.isError(err, res)) next();
+        fault(err, next);
         res.render('channel', {channel : undefined, list : channels}); //Should ask user to request with a channel id
     });
 });
@@ -34,12 +34,12 @@ router.get('/new', function(req, res){
  */
 router.get('/:id', function(req, res, next){
     Channel.findById(req.params.id, function(err, channel){
-        if(globals.isError(err, res)) next();
+		fault(err, next);
         //Will return null or the object depending on if channel is found or not
         //If null, should ask user to try again with a different id
         if(channel === null) {
             Channel.find({}, function(err, channels) {
-                if(globals.isError(err, res)) next();
+				fault(err, next);
                 res.render('channel', {channel : null, list : channels}); //Also list available channels
             });
         } else {
@@ -65,7 +65,7 @@ router.post('/', function(req, res, next){
             pageHead : page,
             pageTail : page
         }, function(err, channel){
-            if(globals.isError(err, res)) next();
+			fault(err, next);
             res.redirect('/channel/'+channel._id);
         });
     });
@@ -76,7 +76,7 @@ router.post('/', function(req, res, next){
  */
 router.delete('/:id', function(req, res){
     Channel.findByIdAndRemove(req.parms.id, function(err){
-        if(globals.isError(err, res)) next();
+		fault(err, next);
         res.send("Successfully remove channel of id", req.params.id);
     });
 });

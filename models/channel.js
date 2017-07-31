@@ -20,7 +20,8 @@ const ChannelSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'messagePage'
     },
-    members : [String]
+    members : [String],
+    numConnected : Number
 },
 {
     timestamps : true

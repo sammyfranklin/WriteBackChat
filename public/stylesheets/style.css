@@ -1,4 +1,22 @@
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
 a {
     color: inherit;
     text-decoration: inherit;
+}
+.white{
+    color: white;
+}
+#left-nav {
+}
+#page-content {
+    padding: 20px 40px 20px 250px;
+}
+#messages {
+    overflow-y: scroll;
+    height: 85vh;
+}
+#channel {
 }
