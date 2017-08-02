@@ -1,12 +1,19 @@
 import io from 'socket.io-client';
 const hostname = 'http://localhost:8000';
 let socket = {};
+let room = null;
 
 module.exports = {
     index : {
 		connect : function(){
 			if(user){
 				socket = io(hostname);
+				setIdentity();
+				socket.on('reconnect', () => setIdentity());
+				return socket;
+			}
+			return false;
+			function setIdentity(){
 				if(user.twitch){
 					socket.emit('set identity', {
 						name : user.twitch.displayName,
@@ -21,9 +28,7 @@ module.exports = {
 						provider : "anonymous"
 					});
 				}
-				return socket;
 			}
-			return false;
 		}
     },
     room : {
@@ -67,8 +72,25 @@ module.exports = {
 			});
 		},
         joinRoom : function(roomId){
-            socket.emit('room', roomId);
+			if(room){
+				socket.emit('leave room', room);
+			}
+            socket.emit('join room', roomId);
+            room = roomId;
         },
+		leaveRoom : function(){
+        	if(room){
+				socket.emit('leave room', room);
+				room = null;
+			}
+		},
+		undoOldRoomState : function(path){
+			if(room && path !== `/channels/${room}`){
+				console.log("Leaving room");
+				socket.emit('leave room', room);
+				room = null;
+			}
+		},
         onMessage : function(callback){
             socket.on('message', callback);
         },

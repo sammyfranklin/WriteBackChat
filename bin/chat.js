@@ -24,8 +24,7 @@ module.exports = {
 					age : user.age,
 					email : user.email,
 					provider : user.provider,
-					bio : user.bio,
-					rooms : user.rooms || []
+					bio : user.bio
 				};
                 console.log("All users:", currentUsers);
             });
@@ -33,27 +32,51 @@ module.exports = {
             /*
              Disconnection
              */
-			socket.on('disconnect', ()=>{
+			socket.on('disconnecting', ()=>{
 				console.log(socket.id, "disconnected!");
-				delete currentUsers[socket.id];
-				console.log(currentUsers);
+				let user = currentUsers[socket.id];
+				if(user){
+					delete currentUsers[socket.id];
+					leaveAllRooms(user, true);
+				}
 			});
 
             /*
              Room Join
              */
-            socket.on('room', function (room) {
-				let user = currentUsers[socket.id];
-				console.log(socket.id, ' has joined ', room);
-                socket.join(room);
-                user.rooms.push(room);
-                let data = {
-                    value : `${user.name} has joined the channel!`,
-                    date : new Date(Date.now())
-                };
-                io.to(room).emit('message', data, botty);
-                console.log(currentUsers);
-            });
+            socket.on('join room', function (room) {
+            	identify(user=>{
+					console.log(socket.id, ' has joined ', room);
+					socket.join(room);
+					let data = {
+						value : `${user.name} has joined the channel!`,
+						date : new Date(Date.now())
+					};
+					io.to(room).emit('message', data, botty);
+				});
+
+			});
+
+			/*
+			 Room Leave
+			 */
+			socket.on('leave room', (room)=>{
+				identify(user=>{
+					console.log(socket.id, ' has left ', room);
+					socket.leave(room);
+					let data = {
+						value : `${user.name} has left the channel!`,
+						date : new Date(Date.now())
+					};
+					io.to(room).emit('message', data, botty);
+				});
+			});
+
+			socket.on('leave all rooms', ()=>{
+				identify(user => {
+					leaveAllRooms(user, false);
+				});
+			});
 
 
             /*
@@ -62,18 +85,37 @@ module.exports = {
 
             //Room Messaging
             socket.on('message', function (toRoomId, msg) {
-                //Send back to room and user
-                let data = {
-                    value : msg,
-                    date : new Date(Date.now())
-                };
-                let user = currentUsers[socket.id];
-                io.to(toRoomId).emit('message', data, user);
-				MessageStore.send(data, user, toRoomId);
+                identify(user=>{
+					let data = {
+						value : msg,
+						date : new Date(Date.now())
+					};
+					io.to(toRoomId).emit('message', data, user);
+					if(user.provider !== 'anonymous') MessageStore.send(data, user, toRoomId);
+					console.log(socket.rooms);
+				});
 
 			});
 
 
+			function identify(callback){
+				let user = currentUsers[socket.id];
+				if(user) callback(user);
+				else {
+					socket.emit('error', 'Not Identified');
+				}
+			}
+			function leaveAllRooms(user, isDisconnecting){
+				let data = {
+					value : `${user.name} has left the channel!`,
+					date : new Date(Date.now())
+				};
+				Object.keys(socket.rooms).forEach(room => {
+					if(room !== socket.id) io.to(room).emit('message', data, botty);
+					if(!isDisconnecting) socket.leave(room);
+				});
+			}
         });
     }
 };
+

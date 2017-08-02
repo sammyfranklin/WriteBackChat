@@ -5,18 +5,21 @@ import Channel from './channels/channel';
 import Friends from './friends';
 import Login from './login';
 import Account from './account';
-import { index as networking } from '../networking';
+import networking from '../networking';
 
 class Index extends React.Component {
     constructor(props){
         super(props);
         this.state = {};
-        networking.connect();
+        networking.index.connect();
     }
 
     componentDidMount(){
-        console.log("PROPS:", this.props);
         console.log("USER:", user);
+    }
+    componentDidUpdate(){
+        console.log(this.props.location.pathname);
+        networking.room.undoOldRoomState(this.props.location.pathname);
     }
 
     render(){
