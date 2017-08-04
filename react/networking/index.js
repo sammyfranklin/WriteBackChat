@@ -5,6 +5,15 @@ let room = null;
 
 module.exports = {
     index : {
+		getMe : function(callback){
+			$.ajax({
+				method : "GET",
+				url : '/users',
+				dataType : "json",
+				success : callback,
+				error : console.error
+			});
+		},
 		connect : function(){
 			if(user){
 				socket = io(hostname);
@@ -52,21 +61,22 @@ module.exports = {
 				error : console.error
 			});
 		},
-		getMine : function(callback){
-			$.ajax({
-				method : "GET",
-				url : '/users?fetch=rooms',
-				dataType : "json",
-				success : callback,
-				error : console.error
-			});
-		},
 		edit : function(id, room, callback){
 			$.ajax({
 				method : "PUT",
 				url : "/channels/"+id,
 				dataType : "json",
 				data : room,
+				success : callback,
+				error : console.error
+			});
+		},
+		toggleSaved : function(userId, roomId, callback){
+			$.ajax({
+				method : "PUT",
+				url : `/users/${userId}/channels/toggleSaved/${roomId}`,
+				dataType : "json",
+				//data : room,
 				success : callback,
 				error : console.error
 			});

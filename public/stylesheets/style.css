@@ -9,6 +9,12 @@ a {
 .white{
     color: white;
 }
+.clickable {
+    cursor : pointer;
+}
+.save-star:hover {
+
+}
 #left-nav {
 }
 #page-content {

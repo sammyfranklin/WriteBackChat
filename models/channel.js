@@ -21,7 +21,10 @@ const ChannelSchema = new mongoose.Schema({
         ref : 'messagePage'
     },
     members : [String],
-    numConnected : Number
+    numConnected : {
+        type : Number,
+		default : 0
+    }
 },
 {
     timestamps : true

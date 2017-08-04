@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { room as networking } from '../networking';
+import { index as networking } from '../networking';
 
 class Account extends React.Component {
 	constructor(props){
@@ -8,7 +8,8 @@ class Account extends React.Component {
 		console.log("in account");
 		this.state = {
 			room : {},
-			createdRooms : user.createdRooms || []
+			createdRooms : user.createdRooms || [],
+			user : {}
 		};
 		this.getChatRooms();
 	}
@@ -17,10 +18,10 @@ class Account extends React.Component {
 	}
 	getChatRooms(){
 		let self = this;
-		networking.getMine((data)=>{
-			user = data;
+		networking.getMe((data)=>{
 			self.setState({
-				createdRooms : data.createdRooms
+				createdRooms : data.createdRooms,
+				user : data
 			});
 		});
 	}

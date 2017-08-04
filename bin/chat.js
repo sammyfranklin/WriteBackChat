@@ -4,6 +4,7 @@ const botty = {
     age : Infinity
 };
 const MessageStore = require('./messageStore');
+const ChannelStore = require('./channel');
 
 
 module.exports = {
@@ -52,6 +53,7 @@ module.exports = {
 						value : `${user.name} has joined the channel!`,
 						date : new Date(Date.now())
 					};
+					ChannelStore.incrementNumConnected(room);
 					io.to(room).emit('message', data, botty);
 				});
 
@@ -68,6 +70,7 @@ module.exports = {
 						value : `${user.name} has left the channel!`,
 						date : new Date(Date.now())
 					};
+					ChannelStore.decrementNumConnected(room);
 					io.to(room).emit('message', data, botty);
 				});
 			});
@@ -111,8 +114,11 @@ module.exports = {
 					date : new Date(Date.now())
 				};
 				Object.keys(socket.rooms).forEach(room => {
-					if(room !== socket.id) io.to(room).emit('message', data, botty);
-					if(!isDisconnecting) socket.leave(room);
+					if(room !== socket.id) {
+						io.to(room).emit('message', data, botty);
+						ChannelStore.decrementNumConnected(room);
+						if(!isDisconnecting) socket.leave(room);
+					}
 				});
 			}
         });

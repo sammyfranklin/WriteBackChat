@@ -10,10 +10,22 @@ import networking from '../networking';
 class Index extends React.Component {
     constructor(props){
         super(props);
-        this.state = {};
+        this.state = {
+            myChannels : []
+        };
         networking.index.connect();
+        this.getMyChannels();
     }
-
+	getMyChannels(){
+    	if(user && user.twitch){
+			let self = this;
+			networking.getMe((data)=>{
+				self.setState({
+					myChannels : data.channels
+				});
+			});
+		}
+	}
     componentDidMount(){
         console.log("USER:", user);
     }
@@ -62,7 +74,7 @@ class Index extends React.Component {
                                 user && user.twitch
                                     ?
                                     (user.channels.length === 0 && <Link to="/channels" className="item">None added yet!</Link>) ||
-                                    (user.channels.map(eachChannel))
+                                    (myChannels.map(eachChannel))
                                     :
                                     <Link to="/login" className="item">Sign in with Twitch first!</Link>
                             }
@@ -104,9 +116,9 @@ class Index extends React.Component {
             </div>
         );
         function eachChannel(channel, i){
-            let isLocation = self.props.location.pathname === "/channels/"+i;
+            let isLocation = self.props.location.pathname === "/channels/"+channel._id;
             return (
-                <Link key={i} to={`/channels/${i}`} className={`${isLocation && "active"} item`}>Channel {i}</Link>
+                <Link key={i} to={`/channels/${channel._id}`} className={`${isLocation && "active"} item`}>{channel.name}</Link>
             );
         }
         function eachFriend(friend, i){
