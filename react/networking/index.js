@@ -61,6 +61,15 @@ module.exports = {
 				error : console.error
 			});
 		},
+		getMessages : function(id, callback){
+			$.ajax({
+				method : "GET",
+				url : `/channels/${id}/messages`,
+				dataType : "json",
+				success : callback,
+				error : console.error
+			});
+		},
 		edit : function(id, room, callback){
 			$.ajax({
 				method : "PUT",

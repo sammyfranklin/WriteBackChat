@@ -3212,6 +3212,15 @@ module.exports = {
 				error: console.error
 			});
 		},
+		getMessages: function getMessages(id, callback) {
+			$.ajax({
+				method: "GET",
+				url: '/channels/' + id + '/messages',
+				dataType: "json",
+				success: callback,
+				error: console.error
+			});
+		},
 		edit: function edit(id, room, callback) {
 			$.ajax({
 				method: "PUT",
@@ -29562,7 +29571,7 @@ var Index = function (_React$Component) {
         value: function getMyChannels() {
             if (user && user.twitch) {
                 var self = this;
-                _networking2.default.getMe(function (data) {
+                _networking2.default.index.getMe(function (data) {
                     self.setState({
                         myChannels: data.channels
                     });
@@ -29649,7 +29658,7 @@ var Index = function (_React$Component) {
                                 _reactRouterDom.Link,
                                 { to: '/channels', className: 'item' },
                                 'None added yet!'
-                            ) || myChannels.map(eachChannel) : _react2.default.createElement(
+                            ) || user.channels.map(eachChannel) : _react2.default.createElement(
                                 _reactRouterDom.Link,
                                 { to: '/login', className: 'item' },
                                 'Sign in with Twitch first!'
@@ -29775,7 +29784,6 @@ var Channels = function (_React$Component) {
             var self = this;
             _networking.room.get(null, function (data) {
 
-                console.log(user.channels);
                 if (user && user.twitch) {
                     data.forEach(function (channel, i) {
                         console.log(channel._id);
@@ -35124,9 +35132,32 @@ var Chat = function (_React$Component) {
     }, {
         key: 'setUpNetworking',
         value: function setUpNetworking() {
+            var _this2 = this;
+
             console.log("Joined channel Id", this.props.channelId);
             _networking.room.joinRoom(this.props.channelId);
             var self = this;
+            _networking.room.getMessages(this.props.channelId, function (data) {
+                console.log(data);
+                var messages = data.map(function (msg) {
+                    console.log(msg.author.twitch);
+                    return {
+                        content: msg.content,
+                        user: {
+                            _id: msg.author._id,
+                            name: msg.author.twitch.displayName,
+                            //age : user.age,
+                            email: msg.author.twitch.email,
+                            provider: "twitch",
+                            bio: msg.author.twitch._json.bio
+                        }
+                    };
+                });
+                self.setState({
+                    messages: [].concat(_toConsumableArray(messages), _toConsumableArray(self.state.messages))
+                });
+                _this2.resetScroll();
+            });
             _networking.room.onMessage(function (message, user) {
                 self.setState({
                     messages: [].concat(_toConsumableArray(self.state.messages), [{
@@ -35134,9 +35165,14 @@ var Chat = function (_React$Component) {
                         user: user
                     }])
                 });
-                var messages = document.getElementById("messages");
-                messages.scrollTop = messages.scrollHeight;
+                _this2.resetScroll();
             });
+        }
+    }, {
+        key: 'resetScroll',
+        value: function resetScroll() {
+            var messages = document.getElementById("messages");
+            messages.scrollTop = messages.scrollHeight;
         }
     }, {
         key: 'sendMessage',
@@ -35150,7 +35186,7 @@ var Chat = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this2 = this;
+            var _this3 = this;
 
             var self = this;
             return _react2.default.createElement(
@@ -35172,7 +35208,7 @@ var Chat = function (_React$Component) {
                     _react2.default.createElement(
                         'button',
                         { className: 'ui button labeled icon', onClick: function onClick() {
-                                return _this2.sendMessage();
+                                return _this3.sendMessage();
                             } },
                         'Send ',
                         _react2.default.createElement('i', { className: 'ui send icon' })
@@ -35408,6 +35444,8 @@ var _reactRouterDom = __webpack_require__(31);
 
 var _networking = __webpack_require__(25);
 
+var _networking2 = _interopRequireDefault(_networking);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35424,7 +35462,6 @@ var Account = function (_React$Component) {
 
 		var _this = _possibleConstructorReturn(this, (Account.__proto__ || Object.getPrototypeOf(Account)).call(this, props));
 
-		console.log("in account");
 		_this.state = {
 			room: {},
 			createdRooms: user.createdRooms || [],
@@ -35443,7 +35480,7 @@ var Account = function (_React$Component) {
 		key: 'getChatRooms',
 		value: function getChatRooms() {
 			var self = this;
-			_networking.index.getMe(function (data) {
+			_networking2.default.index.getMe(function (data) {
 				self.setState({
 					createdRooms: data.createdRooms,
 					user: data
@@ -35463,7 +35500,7 @@ var Account = function (_React$Component) {
 		key: 'submitChatRoom',
 		value: function submitChatRoom() {
 			var self = this;
-			_networking.index.post(this.state.room, function (data) {
+			_networking2.default.room.post(this.state.room, function (data) {
 				console.log(data);
 				var rooms = self.state.createdRooms;
 				rooms.push(data);

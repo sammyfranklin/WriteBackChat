@@ -25,6 +25,27 @@ class Chat extends React.Component {
         console.log("Joined channel Id", this.props.channelId);
         networking.joinRoom(this.props.channelId);
         let self = this;
+        networking.getMessages(this.props.channelId, data => {
+            console.log(data);
+            let messages = data.map(msg => {
+                console.log(msg.author.twitch);
+                return {
+                    content : msg.content,
+                    user : {
+						_id : msg.author._id,
+						name : msg.author.twitch.displayName,
+						//age : user.age,
+						email : msg.author.twitch.email,
+						provider : "twitch",
+						bio : msg.author.twitch._json.bio
+                    }
+                }
+            });
+            self.setState({
+                messages : [...messages, ...self.state.messages]
+            });
+            this.resetScroll();
+        });
         networking.onMessage((message, user)=>{
             self.setState({
                 messages : [...self.state.messages, {
@@ -32,10 +53,12 @@ class Chat extends React.Component {
                     user : user
                 }]
             });
-            let messages = document.getElementById("messages");
-            messages.scrollTop = messages.scrollHeight;
+            this.resetScroll();
         });
-
+    }
+    resetScroll(){
+		let messages = document.getElementById("messages");
+		messages.scrollTop = messages.scrollHeight;
     }
 
     sendMessage(){

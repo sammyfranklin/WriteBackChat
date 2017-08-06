@@ -19,7 +19,7 @@ class Index extends React.Component {
 	getMyChannels(){
     	if(user && user.twitch){
 			let self = this;
-			networking.getMe((data)=>{
+			networking.index.getMe((data)=>{
 				self.setState({
 					myChannels : data.channels
 				});
@@ -74,7 +74,7 @@ class Index extends React.Component {
                                 user && user.twitch
                                     ?
                                     (user.channels.length === 0 && <Link to="/channels" className="item">None added yet!</Link>) ||
-                                    (myChannels.map(eachChannel))
+                                    (user.channels.map(eachChannel))
                                     :
                                     <Link to="/login" className="item">Sign in with Twitch first!</Link>
                             }

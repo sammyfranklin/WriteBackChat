@@ -11,6 +11,10 @@ const messagePageSchema = new mongoose.Schema({
             date : Date
         }
     }],
+    previous : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'messagePage'
+    },
     next : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'messagePage'

@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { index as networking } from '../networking';
+import networking from '../networking';
 
 class Account extends React.Component {
 	constructor(props){
 		super(props);
-		console.log("in account");
 		this.state = {
 			room : {},
 			createdRooms : user.createdRooms || [],
@@ -18,7 +17,7 @@ class Account extends React.Component {
 	}
 	getChatRooms(){
 		let self = this;
-		networking.getMe((data)=>{
+		networking.index.getMe((data)=>{
 			self.setState({
 				createdRooms : data.createdRooms,
 				user : data
@@ -35,7 +34,7 @@ class Account extends React.Component {
 	}
 	submitChatRoom(){
 		let self = this;
-		networking.post(this.state.room, data=>{
+		networking.room.post(this.state.room, data=>{
 			console.log(data);
 			let rooms = self.state.createdRooms;
 			rooms.push(data);

@@ -15,7 +15,6 @@ class Channels extends React.Component {
     	let self = this;
     	networking.get(null, (data)=>{
 
-    		console.log(user.channels);
     		if(user && user.twitch){
 				data.forEach((channel, i) => {
 					console.log(channel._id);

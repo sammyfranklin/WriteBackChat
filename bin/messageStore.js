@@ -1,5 +1,6 @@
 const Channel = require('../models/channel');
 const MessagePage = require('../models/messagePage');
+const redis = require('./redis');
 const fault = require('../globals').fault;
 const MAX_PAGE_LENGTH = 5;
 
@@ -32,21 +33,41 @@ class MessageStore {
             if(channel.pageTail.messages.length > MAX_PAGE_LENGTH - 1) {
                 console.log("Creating a message page with this message.");
                 MessagePage.create({
+                	previous : channel.pageTail._id,
                     messages : [post]
                 }, (err, newPage)=>{
-                    if(fault(err)) return false;
-                    // Old page tail's next should refer to new page tail
-                    channel.pageTail.next = newPage;
-                    // Save Old page Tail
-                    channel.pageTail.save();
-                    // Channel's page tail should refer to new page tail
-                    channel.pageTail = newPage;
-                    // Save Channel
-                    channel.save();
-                });
+					if(fault(err)) return false;
+					// Save it to cache
+
+					 redis.set(`messages:${toRoom}`, JSON.stringify(newPage.messages), err => {
+						 fault(err);
+					 });
+
+					// Old page tail's next should refer to new page tail
+					channel.pageTail.next = newPage._id;
+
+					// Save Old page Tail
+					channel.pageTail.save();
+
+					// Channel's page tail should refer to new page tail
+					channel.pageTail = newPage._id;
+
+					// Save Channel
+					channel.save();
+
+				});
             // Else, push into existing page
             } else {
                 console.log("Pushing message into existing page");
+                // Cache message
+                redis.get(`messages:${toRoom}`, (err, messages) => {
+                	fault(err);
+                	let newMessages = JSON.stringify([...(JSON.parse(messages)), post]);
+                	redis.set(`messages:${toRoom}`, newMessages, err => {
+                		fault(err);
+					});
+				});
+
                 channel.pageTail.messages.push(post);
                 // Save channel and its page tail
                 //channel.save();
