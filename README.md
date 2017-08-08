@@ -1,5 +1,7 @@
 # chat
 A realtime chat service
-- WebRTC
-- Redis
+- Node.js
+- React & react-router-dom
+- socket.io
+- Redis (cache most recent message page)
 - MongoDB
